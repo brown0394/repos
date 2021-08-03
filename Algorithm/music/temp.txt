@@ -1,0 +1,152 @@
+
+void Alignment::CalcScore(int str1begin, int str2begin) {
+    int mscore, a, b, c, maxcount = 0, max = 0;
+    int incredown = 1, increright = 1;
+    int i = str1begin, j = str2begin;
+    bool right = true, down = false, change = false, zero = true;
+    int loc1, loc2;
+    while (true) {
+        if (_str[i] == _str[j]) {
+            mscore = _match;
+        }
+        else {
+            mscore = _mismatch;
+        }
+        if (i - str1begin == 0 || j - str2begin == 0) {
+            a = 0 + mscore;
+        }
+        else {
+            a = table[i - str1begin - 1][j - str2begin - 1] + mscore;
+        }
+        if (j - str2begin == 0) {
+            b = 0;
+        }
+        else {
+            b = table[i - str1begin][j - str2begin - 1] + _gap;
+        }
+        if (i - str1begin == 0) {
+            c = 0;
+        }
+        else {
+            c = table[i - str1begin - 1][j - str2begin] + _gap;
+        }
+        if (a < 0 && b < 0 && c < 0) {
+            table[i - str1begin][j - str2begin] = 0;
+        }
+        else if (a >= b && a >= c) {
+            table[i - str1begin][j - str2begin] = a;
+        }
+        else if (b >= a && b >= c) {
+            table[i - str1begin][j - str2begin] = b;
+        }
+        else if (c >= a && c >= b) {
+            table[i - str1begin][j - str2begin] = c;
+        }
+        if (max < table[i - str1begin][j - str2begin]) {
+            max = table[i - str1begin][j - str2begin];
+            change = true;
+            maxcount = 0;
+            loc1 = i;
+            loc2 = j;
+        }
+
+        if (table[i - str1begin][j - str2begin] != 0) {
+            zero = false;
+        }
+
+        if (i - str1begin == incredown && j - str2begin == increright) {
+            if (i + str1begin == str2begin && j + str2begin == _idx) {
+                break;
+            }
+            if (incredown + 1 + str1begin < str2begin) {
+                ++incredown;
+            }
+            if (increright + 1 + str2begin < _idx) {
+                ++increright;
+            }
+            right = true;
+            down = false;
+            i = str1begin;
+
+            if (change) {
+                change = false;
+            }
+            else {
+                ++maxcount;
+                if (maxcount > 6) {
+                    break;
+                }
+            }
+            if (zero) {
+                break;
+            }
+            else {
+                zero = true;
+            }
+        }
+        else if (j - str2begin == increright) {
+            right = false;
+            down = true;
+        }
+        else if (i - str1begin == incredown) {
+            right = true;
+            down = false;
+        }
+        if (right) {
+            if (j + 1 == _idx) {
+                right = false;
+                down = true;
+            }
+            else {
+                ++j;
+            }
+        }
+        if (down) {
+            if (i + 1 == str2begin) {
+                right = true;
+                down = false;
+            }
+            else {
+                if (i - str1begin + 1 == incredown) {
+                    right = true;
+                    down = false;
+                    j = str2begin;
+                }
+                ++i;
+            }
+        }
+    }
+
+    if (max > _max) {
+        _max = max;
+        TraceBack(str1begin, str2begin, loc1, loc2);
+    }
+}
+
+void Alignment::FindString(int str1begin, int str2begin, int st1end, int st2end) {
+    _max1loc = str1begin;
+    _max2loc = str2begin;
+    _str1 = "";
+    _str2 = "";
+    for (int i = str1begin; i < st1end + 1; ++i) {
+        _str1 += _str[i];
+    }
+    for (int i = str2begin; i < st2end + 1; ++i) {
+        _str2 += _str[i];
+    }
+}
+
+        if (st1end - str1begin - 1 >= 0) {
+            if (table[st1end - str1begin - 1][st2end - str2begin] >= 0 && table[st1end - str1begin - 1][st2end - str2begin] == table[st1end - str1begin][st2end - str2begin] - _gap) {
+                --st1end;
+                _str1 = _str[st1end - 1] + _str1;
+                continue;
+            }
+        }
+        if (st2end - str2begin - 1 >= 0) {
+            if (table[st1end - str1begin][st2end - str2begin - 1] >= 0 && table[st1end - str1begin][st2end - str2begin - 1] == table[st1end - str1begin][st2end - str2begin] - _gap) {
+                --st2end;
+                _str2 = _str[st2end - 1] + _str2;
+                continue;
+            }
+        }
